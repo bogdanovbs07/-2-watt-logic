@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Товар — Watt Logic</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
+        a { color: #4CAF50; text-decoration: none; }
+        .price { font-size: 2em; color: #4CAF50; font-weight: bold; }
+        .category { background: #e0e0e0; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html">← Назад в каталог</a>
+        <div id="loading">⏳ Загрузка...</div>
+        <div id="error" style="color: red; display: none;"></div>
+        <div id="product-detail"></div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get('id');
+
+        async function loadProduct() {
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const detailEl = document.getElementById('product-detail');
+
+            if (!productId) {
+                errorEl.textContent = 'ID товара не указан';
+                errorEl.style.display = 'block';
+                loadingEl.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8000/products/${productId}`);
+                if (!response.ok) {
+                    throw new Error('Товар не найден');
+                }
+                const p = await response.json();
+                detailEl.innerHTML = `
+                    <h1>${p.name}</h1>
+                    <p>${p.description || ''}</p>
+                    <div class="price">$${p.price}</div>
+                    <span class="category">${p.category || 'Gadget'}</span>
+                `;
+            } catch (err) {
+                errorEl.textContent = '❌ ' + err.message;
+                errorEl.style.display = 'block';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        loadProduct();
+    </script>
+</body>
+</html>
